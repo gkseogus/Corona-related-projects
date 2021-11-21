@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<meta charset="UTF-8">
+<title>MQTT Monitoring Service</title>
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script>
+	var socket = io.connect();
+	var timer = null;
+	function checkbox(type){
+			if( type === 'isol'){
+				socket.on("socket_up_Isol", function(data){ 
+					data = JSON.parse(data);
+					$(".mqttlist_Isol").html('<li>'+'격리환자: '+data.QuarantinePatient+'명.'+'</li>');
+				});
+			} else if(type === 'def'){
+				socket.on("socket_up_Def", function(data){
+					data = JSON.parse(data);
+					$(".mqttlist_Def").html('<li>'+'확진환자: '+data.confirmedPatient+'명.'+'</li>');
+				});
+			} else if( type === 'death'){
+				socket.on("socket_up_Death", function(data){
+					data = JSON.parse(data);
+					$(".mqttlist_Death").html('<li>'+'사망환자: '+data.deceasedPatient+'명.'+'</li>');
+				});
+			}
+		if(timer==null){
+			timer = window.setInterval("timer_1()", 10000); //10000 시간 단위로 데이터를 읽는다는 뜻
+		}
+	};
+
+	function timer_1(){ 
+		socket.emit("socket_evt_update", JSON.stringify({}));
+	}
+
+</script>
+</head>
+<body  style="text-align:center;" >
+	<h2>COVID19</h2> 
+	2019년 12월 중국 후베이성 우한시에서 발생하여 세계적으로 확산된, 새로 발견된 신종 코로나바이러스에 의한 호흡기 감염질환
+	<br><br><div class="search">
+		<br><br><button onclick="Check()">원하는 데이터 선택</button><br>
+		<label><input type="checkbox"  onclick="checkbox('death')"  value="사망자" > 사망자</label>
+		<label><input type="checkbox"  onclick="checkbox('def')" value="확진자" > 확진자</label>
+		<label><input type="checkbox"  onclick="checkbox('isol')"  value="격리환자" > 격리환자</label>
+	</div>
+	<h1>서울시 COVID19 정보</h1>
+	<div id="msg">
+		<div id="mqtt_logs">
+			<ul class="mqttlist_Isol"></ul> 
+			<ul class="mqttlist_Def"></ul>
+			<ul class="mqttlist_Death"></ul>
+			<button id="button1" onclick="window.open('http://ncov.mohw.go.kr/')"><b>한국 COVID19</b></button>
+			<button id="button2" onclick="window.open('https://www.seoul.go.kr/coronaV/coronaStatus.do')"><b>COVID19 서울시 발생 현황</b></button>
+		</div><br>
+	</div>
+</body>
+</html>
+
